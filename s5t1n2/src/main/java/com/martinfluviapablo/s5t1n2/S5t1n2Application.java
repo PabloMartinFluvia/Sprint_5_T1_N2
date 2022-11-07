@@ -58,6 +58,10 @@ G) Missatge d'error llegible quan es gestionen les excepcions:
 TODO: Preguntar:
 1) Els links a adjuntar al retornar un recurs només són els que tenen un mètode GET?
 En tots els exemples que he vist és així, però enlloc he vist una explicació...
+
+TODO: Aprofundir en validacions (especifiació JSR 303 i implementació Hibernate Validator)
+https://beanvalidation.org/1.0/spec/
+https://programmerclick.com/article/42141828963/
  */
 
 package com.martinfluviapablo.s5t1n2;

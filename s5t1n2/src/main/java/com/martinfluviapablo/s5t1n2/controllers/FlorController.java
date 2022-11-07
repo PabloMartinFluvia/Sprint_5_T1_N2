@@ -12,14 +12,17 @@
 
 package com.martinfluviapablo.s5t1n2.controllers;
 
+import com.martinfluviapablo.s5t1n2.controllers.operationAnnotations.DeleteOneFlorOperation;
+import com.martinfluviapablo.s5t1n2.controllers.operationAnnotations.GetAllFlorOperation;
+import com.martinfluviapablo.s5t1n2.controllers.operationAnnotations.GetOneFlorOperation;
+import com.martinfluviapablo.s5t1n2.controllers.operationAnnotations.PostOneFlorOperation;
 import com.martinfluviapablo.s5t1n2.model.services.FlorService;
 import com.martinfluviapablo.s5t1n2.model.dto.FlorDto;
 import com.martinfluviapablo.s5t1n2.model.dto.ValidId;
 import com.martinfluviapablo.s5t1n2.model.dto.AddGroup;
 import com.martinfluviapablo.s5t1n2.model.dto.ReplaceGroup;
 
-import io.swagger.annotations.ApiResponse;
-import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -28,8 +31,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Min;
+
+@Tag(name = "Flor CRUD operations.", description = "Requests allowed in application when working with flor resource.")
 @RestController
-@RequestMapping("/flors") // PLURAL resource path
+@RequestMapping(value = "/flors", produces = "application/json") // PLURAL resource path
 @Validated // to validate constraints in request params and path variable
 public class FlorController {
     //Assert method's pre-conditions implemented through validations
@@ -44,42 +50,29 @@ public class FlorController {
         this.florAssembler = florAssembler;
     }
 
-    /**
-     * Find and return all the flor's info in BBDD (if empty only link to collection self relation).
-     * @return All flor's (dto) info + ok code + links to help RESTful API usage.
-     */
     @GetMapping("/getAll")
+    @GetAllFlorOperation
     public ResponseEntity<CollectionModel<EntityModel<FlorDto>>> getAll() {
         return ResponseEntity.ok(
                 florAssembler.toGlobalCollectionModel(
                         florService.getAll()));
-
     }
 
-    /**
-     * Find and returns the flor's info associated to the provided PK.
-     * If it's not found or the PK it's not valid, the response is an error.
-     *
-     * @param id Must be int > 0 to make sense (it's a PK). Otherwise, returns an error.
-     * @return Flor's (dto) info + ok code + links to help RESTful API usage. Or ERROR response.
-     */
     @GetMapping("/getOne/{id}")
-    public ResponseEntity<EntityModel<FlorDto>> geOne(@PathVariable @ValidId Integer id) {
+    @GetOneFlorOperation
+    public ResponseEntity<EntityModel<FlorDto>> getOne(@PathVariable @ValidId Integer id) {
         return ResponseEntity.ok(
                 florAssembler.toModel(
                         florService.getOne(id)));
     }
 
-    /**
-     * Removes from BBDD the flor's data associated to the provided PK.
-     * If it's not found, nothing happens.
-     * @param id Must be int > 0 to make sense (it's a PK). Otherwise, returns an error.
-     * @return HTTP status no content without body, or ERROR response.
-     */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteOne(@PathVariable @ValidId Integer id){
+    @DeleteOneFlorOperation
+    public ResponseEntity<Void> deleteOne(@PathVariable @ValidId Integer id){
         florService.deleteOne(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // T body = null in HttpEntity
+        //No content -> Body type in response: Void.class (better than Object or any other class
+        //for documenting the API)
     }
 
     /**
@@ -91,9 +84,10 @@ public class FlorController {
      * Or ERROR response.
      */
     @PostMapping("/add")
+    @PostOneFlorOperation
     public ResponseEntity<EntityModel<FlorDto>> addOne(@RequestBody @Validated(AddGroup.class) FlorDto dto){
         EntityModel<FlorDto> florModel= florAssembler.toModel(
-                florService.addOne(dto));
+                                            florService.addOne(dto));
         return ResponseEntity
                 .created(florModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(florModel);
@@ -107,7 +101,7 @@ public class FlorController {
      * @return Flor's (dto) info + ok code+ links to help RESTful API usage. Or ERROR response.
      */
     @PutMapping("/update")
-    public ResponseEntity<EntityModel<FlorDto>> replace(@RequestBody @Validated(ReplaceGroup.class) FlorDto dto){
+    public ResponseEntity<EntityModel<FlorDto>> replaceOne(@RequestBody @Validated(ReplaceGroup.class) FlorDto dto){
         EntityModel<FlorDto> florModel= florAssembler.toModel(
                 florService.replace(dto));
         return ResponseEntity.ok(florModel);

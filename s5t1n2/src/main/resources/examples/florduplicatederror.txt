@@ -1,0 +1,5 @@
+{
+    "type": "DuplicateDataException",
+    "message": "Flor Conflict Exception. Ja hi ha registrada una altra flor amb el mateix nom i en el mateix país. FlorEntity: { pk_FlorID=14; nomFlor='Rosa; paisFlor='Alemanya }",
+    "code": 409
+}

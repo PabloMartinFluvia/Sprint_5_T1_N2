@@ -1,0 +1,95 @@
+{
+  "_embedded": {
+    "florsList": [
+      {
+        "pk_FlorID": 1,
+        "nomFlor": "rosa",
+        "paisFlor": "itàlia",
+        "tipusFlor": "UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/1"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      },
+      {
+        "pk_FlorID": 2,
+        "nomFlor": "Margarita",
+        "paisFlor": "Espanya",
+        "tipusFlor": "UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/2"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      },
+      {
+        "pk_FlorID": 3,
+        "nomFlor": "Clavell",
+        "paisFlor": "itALia",
+        "tipusFlor": "UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/3"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      },
+      {
+        "pk_FlorID": 6,
+        "nomFlor": "unkonw",
+        "paisFlor": "unknown",
+        "tipusFlor": "Fora UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/6"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      },
+      {
+        "pk_FlorID": 9,
+        "nomFlor": "Tulipán",
+        "paisFlor": "grecia",
+        "tipusFlor": "UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/9"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      },
+      {
+        "pk_FlorID": 12,
+        "nomFlor": "nom12",
+        "paisFlor": "pais12",
+        "tipusFlor": "Fora UE",
+        "_links": {
+          "self": {
+            "href": "http://localhost:9001/flors/getOne/12"
+          },
+          "collection": {
+            "href": "http://localhost:9001/flors/getAll"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost:9001/flors/getAll"
+    }
+  }
+}
