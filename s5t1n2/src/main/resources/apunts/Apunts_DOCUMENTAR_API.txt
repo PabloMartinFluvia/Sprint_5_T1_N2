@@ -1,0 +1,94 @@
+OPEN API
+1) Open Api main site: https://www.openapis.org/
+2) Explicació de la especificació i getting started https://oai.github.io/Documentation/
+3) Especificació detallada (latest) https://spec.openapis.org/oas/latest.html
+4) Estructura de la especificació de manera interactiva: https://openapi-map.apihandyman.io/
+SWAGGER
+OpenApi specification (cas mateix text que en OpenApi): https://swagger.io/specification/
+Swagger docs (hyperlinks page): https://swagger.io/docs/
+    OpenApi Swagger getting started / guia: https://swagger.io/docs/specification/about/
+    Tool Swagger-UI: https://swagger.io/docs/open-source-tools/swagger-ui/
+Docs Swagger Core (generate OpenApi definitions from exisitng (Java) APIs code):
+https://github.com/swagger-api/swagger-core
+    **Swagger Core 2.X produeix OpenApi 3.0 definicions**
+    Wiki, amb subapartat Getting started:
+    https://github.com/swagger-api/swagger-core/wiki
+JavaDocs del core: https://javadoc.io/doc/io.swagger.core.v3
+        Importants els mòduls core, annotations, models
+
+Extres a mirar:
+https://dzone.com/articles/openapi-3-documentation-with-spring-boot (+ part 2 i 3)
+https://www.baeldung.com/spring-rest-openapi-documentation + extres amb tag swagger
+Tipus de validacions que accepta un json schema
+https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-6.5
+https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-10.3.2
+
+A) URLS ON VEURE LA DOCUMENTACIÓ
+Puc definir els paths dels arxius json i de swagger-ui en application.properties
+http://localhost:9000/v3/api-docs/  (default, en json, afegir .yaml si vull altre format)
+http://localhost:9000/swagger-ui.html (default)
+
+B) DOCUMENTACIÓ BASE -> veure DocsConfig.class
+
+C) ENDPOINTS
+S'autodetecten per defecte, però millor customitzar-los.
+Per documentar un conjunt de endpoints / una classe de controlador millor usar tags
+Indicar també el camp "produces"
+    -> veure controller
+
+D) STATUS CODES DE LES RESPOSTES DELS MÈTODES DOCUMENTATS
+D.1) En el controller, a l'indicar el tipus de resposta quan la petició s'ha resolt correctament, s'uatodetecta
+aquest 2XX.
+D.2) Deshabilitar afegir tots els status codes indicats en un @ControllerAdvice
+    Un @ControllerAdvice, per a gestionar excepcions, té mètodes amb diferents status codes de la resposta.
+    Per defecte, swagger afegeix TOTS els status codes de resposta dels @ControllerAdvice a TOTS els
+    endpoints documentats.
+    Però els endpoints NO tenen per què tenir l'opció de TOTES les recollides (només, potser, algunes).
+    -> SOLUCIÓ:
+        Canviar la configuració en application.properties
+        springdoc.override-with-generic-response=false
+D.3) Usar N anotació @ApiResponse (o directament en array dins @ApiResponses):
+    Especificar: description + response code + content
+
+E) CONTINGUT DE LES RESPOSTES
+E.1) Usant l'anotació @Content (post especificar @ApiResponse):
+    Especificar: schema + example
+    Nota 1:
+        Si només especificat camp examples ( usant referencia ) & NO especificar: schema
+            -> En documentació només es mostra l'exemple (i "pestanya schema" NO habilitada).
+    És recomanable indicar l'esquema, sobretot si és complex.
+
+F) COMPONENTS (SCHEMAS I EXEMPLES a referenciar des d'alguna operation)
+    Un cop declarat l'objecte com a component (dins del map específic dels Components), aquest
+    objecte podrà ser referenciat en qualsevol camp del document (d'aquell tipus), indicant com
+    a valor : $ref: 'pahtxxx' (com tota ref, el path pot ser absolut (a altres arxius yaml) o relatiu
+    (dins del mateix document, usant els '#/xxx/xx' per "accedir" dins dels objectes).
+
+    EXAMPLES:
+        summary: info en desplegable de l'exemple
+        description: info detallada de l'exemple (graficat a sota de l'exemple)
+        value: contingut del body
+    https://stackoverflow.com/questions/63465763/springdoc-openapi-how-to-add-example-of-post-request
+    https://github.com/springdoc/springdoc-openapi/blob/master/springdoc-openapi-javadoc/src/test/java/test/org/springdoc/api/app90/HelloController.java
+
+    SCHEMAS:
+      OBS: Especificar la classe que implementa l'esquema, quan aquesta és una concreta d'una
+      parametritzada (genèric) NO es pot indicar directament mitjançant
+      @Schema(implementation = ClasseParametritzada<ClasseConcreta>.class
+      -> Possible solució, crear una classe (a poder ser interna o poc visible),
+      que heredi d'aquesta + implementation = ClasseFilla.class
+
+G) PARÀMETRES I PATHS VARIABLES
+ Si hi ha alguna constraint només l'autodetecta si l'anotació està en el argument!!!
+        Ex:(@PathVariable @Min(1) ) ok; xo si la constraint és una anotació composta feta per mi
+        NO la detecta!!
+    -> Millor documentar el paràmetre i especificar les constraints en el schema
+    -> Veure anotació IdPathVariable
+
+Documentació i exemples
+Alguns objectes permeten un camp 'description' i 'summary' (for a short description)
+El camp 'description' permet usar  CommonMark 0.27 syntaxis, (per a negretes, títols, links...)
+
+Swagger-ui
+Es pot configurar com es visualitzarà la documentació
+-> veure properties

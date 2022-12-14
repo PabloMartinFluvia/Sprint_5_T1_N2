@@ -7,7 +7,6 @@ només hauria de generar una excepció si l'argument id és null. I si NO es tro
 Problema: la implementació per defecte és SimpleJpaRepository (org.springframework.data.jpa.repository.support),
 i en aquesta implementació el deleteById llança una excepció EmptyResultDataAccessException si no existeix:
     Default deleteById:
-
     delete(findById(id).orElseThrow(() -> new EmptyResultDataAccessException(
                 String.format("No %s entity with id %s exists!", entityInformation.getJavaType(), id), 1)))
 

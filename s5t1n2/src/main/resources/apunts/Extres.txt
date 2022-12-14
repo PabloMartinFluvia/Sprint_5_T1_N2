@@ -1,0 +1,18 @@
+Comprovacions i millores extra:
+A) Transformació a JSON <-> dto funciona si no hi ha "no args constructor"?
+ 	(exemple: només un constructor amb tots els atributs) OJO amb el toDto del parser quan faci la prova
+B) Una anotació @Validated amb àmbit de classe i una amb àmbit d'argument de mètode +
+ les dues associades a grups diferents i excloents -> quina té preferència a l'invocar el mètode?
+ S'aplica:
+ 	els dos grups -> ??
+ 	només el del mètode -> ??
+ 	només el de la classe -> NO
+
+C) Creació dels Maps dels exemples i esquemes per a guardar-los en components.
+    Usar, per a crear el bean, Map.ofEntries té el potencial de convertir-se en un codi espagueti.
+    Pensar alguna manera d'injectar en un mètode TOTA la col·lecció d'entries d'exemples i/o squemes
+    i generar el Map sense haver d'indicar els entries d'un en un.
+
+Aprofundir en validacions (especificació JSR 303 i implementació Hibernate Validator)
+https://beanvalidation.org/1.0/spec/
+https://programmerclick.com/article/42141828963/

@@ -1,0 +1,7 @@
+{
+    "type": "FlorNotFoundException",
+    "message": [
+        "No existeix cap flor amb id: 23"
+    ],
+    "code": 404
+}

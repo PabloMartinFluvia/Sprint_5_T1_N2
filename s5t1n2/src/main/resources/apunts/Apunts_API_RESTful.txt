@@ -1,0 +1,91 @@
+0)OBTENIR VALORS DEL POM.xml
+És poc obtenir, com a V d'un K especificat en application.properties, un valor del pom.xml:
+    exemple: application.version=@project.version@
+
+A) INJECCIÓ DE BEANS
+A.1) Injeccions @Autowired
+Millor fer-ho annotant el constructor (¿?). He llegit que aquesta pràctica facilita fer els testos.
+A.2) Injecció de col·leccions.
+S'admet que si vull injectar una col·lecció de Beans, dir que agafi tots els beans del tipus indicat.
+Exemple: en examplesConfig he definit N beans de tipus Entry<String,Example>
+    -> Si indico, per exemple en els paràmetres d'un Bean, que injecti Collection<Entry<String,Example>>
+    -> aquesta col·lecció serà de tots els beans definits d'aquest tipus.
+
+B) SERIALITZACIÓ / DESERIALITZACIÓ TO/FROM JSON:
+B.1) Configurar com serialitzar / deszerialitzar to JSON:
+    -> SOLUCIÓ:
+    Configurar el mapper de Jackson, ja sigui amb un nou bean o a través de properties.
+    Exemple fet: no acceptar un float en el json com a un int vàlid (per defecte el mapper el trunca).
+
+C) VALIDACIÓ DE CONSTRAINTS
+C.1) Validació de Paths i Paràmetres (anotacions tipus constraints en els arguments dels mètodes):
+Posar anotació @Validated en el Controller
+    IMPORTANT:
+	Cal tenir alguna implementació JSR 303 de Java Validation API, per exemple hibernate-validator,
+	+ cal un bean MethodValidationPostProcessor:
+	    EN TEORIA SPRING BOOT L'AUTOCONFIGURA al tenir en el class path hibernate-validator.
+	    En la versió 6.0.10.Final l'autoconfigura i NO cal declarar el bean,
+	    però usant l'última versió hibernate-validator NO es configura (WTF???)
+	    ni deixa crear el bean (no trova el classpath).
+	-> SOLUCIÓ:
+	No posar la versió del hibernate-validator en el pom.xml -> SpringBoot autoconfigura el bean correctament.
+	Opcionalment afegir
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+
+C.2) Realitzar una validació només sobre un grup de constraints concretes.
+    *Per defecte, si no s'indica res, les constraints pertanyen al grup Default.class
+    i el @Validated s'aplica sobre aquest grup.
+    Una anotació de constraint puc indicar que pertany a un determinat grup (-> una interface declarada per mi).
+    Una anotació @Validated put indicar que evalui només les constraints d'un determinat grup.
+    Ex: 2 mètodes, amb bodies que s'han d'aplicar data binding a una mateixa classe, però amb constraints
+    diferents segons el mètode -> a cada @RequestBody aplicar un @Validated amb un grup diferent, on cada
+    grup inclou les constraints requerides per aquell mètode.
+
+C.3) Missatges d'error a mostrar si falla una constraint:
+    Es poden configurar/externalitzar usant l'arxiu ValidationMessages.properties .
+
+C.4) Definir un grup de constraints:
+Crear una interface + en la constraint indicar que pertany al grup de la classe de la interface
+    *Al validar el grup de la classe de la interface es validaran només les constraints que
+    s'hagi especificat que pertanyen a aquell grup
+    Nota: si indico que la interface "extends Default" -> al validar aquell grup TAMBÉ es validen
+    les constraints que NO S'HAN ASSIGNAT A CAP GRUP (ja que si no s'indica res, les constraints
+    s'assignen al grup default).
+
+D) RESPOSTES + HATEOAS
+D.1) Afegir links al body:
+    Usar EntityModel i CollectionModel (classes genèriques que permeten afegir links als continguts).
+    Crear una classe Assembler que assumeixi la responsabilitat.
+        *Cridar-la des del Controller
+D.2) NO CONTENT Http response:
+    Quan vulgui retornar un ResponseEntity SENSE body -> És millor que el tipus de resposta
+    sigui ResponseEntity<Void>. El Void.class és un tipus de classe per simular un contingut NULL sense
+    atributs.
+    Millor que un objecte random amb valor null (en aquest cas en la documentació el body tindria un valor
+    null, enlloc d'estar buit).
+D.3) CREATED Http response:
+    Al retornar el response entity amb un status created (usant el builder) demana una URI.
+    -> És el link self del recurs
+
+E) EXCEPCIONS I CONTINGUT DEL BODY
+E.1) Llançar Excepció NoHandlerFoundException per a poder capturar-la i gestionar-la:
+    * Quan ruta de la petició del client no mapejada -> cap controlador/mètode la gestiona
+    -> SOLUCIÓ:
+    Posar en properties:
+        spring.mvc.throw-exception-if-no-handler-found=true
+        spring.web.resources.add-mappings = false
+E.2) Modificar / Customitzar missatges en excepcions
+    https://www.baeldung.com/global-error-handler-in-a-spring-rest-api
+
+F) REPOSITORIS i ENTITATS:
+F.1) Les implementacions default del DAO de Spring JPA poden generar problemes:
+    -> SOLUCIÓ:
+    @Override + default el mètode en qüestió en la interfaç
+    Exemple: deleteById en SimpleJpaRepository llança excepció si no existeix recurs amb l'id proporcionat.
+
+G) MOTOR DE BD:
+G.1) Crear la DB en MySQL si no existeix:
+    -> SOLUCIÓ:
+    Explicitar-ho (properties) com a paràmetre de l'URL de la datasource.
+

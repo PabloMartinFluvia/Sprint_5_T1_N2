@@ -12,48 +12,50 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 @Service
-public class FlorService {
+public class LocalFlorCrudService implements FlorCrudService{
 
     private final FlorRepository repository;
 
     private final FlorParser parser;
 
     @Autowired
-    public FlorService(FlorRepository repository, FlorParser parser) {
+    public LocalFlorCrudService(FlorRepository repository, FlorParser parser) {
         this.repository = repository;
         this.parser = parser;
     }
 
+    @Override
     public List<FlorDto> getAll(){
         return repository.findAll().stream()
                 .map(parser::toDto).toList();
     }
 
+    @Override
     public FlorDto getOne(Integer id){
         Assert.notNull(id,"The given id must not be null!");
-        //this method can work with id<=0
 
         return repository.findById(id)
                .map(parser::toDto)
-               .orElseThrow(() -> new FlorNotFoundException("No existeix cap flor amb id: "+id));
+               .orElseThrow(() -> new FlorNotFoundException(id));
     }
 
+    @Override
     public void deleteOne(Integer id){
         Assert.notNull(id,"The given id must not be null!");
-        //this method can work with id<=0
 
         repository.deleteById(id);
     }
 
+    @Override
     public FlorDto addOne(FlorDto dto){
         doAssertsBdSchema(dto);
-        //this method can work with empty String fields, and ignores dto's id value when is parsed to entity
-
+        assertNoDataDuplication(dto);
         return parser.toDto(
                 repository.save(
                         parser.toEntity(dto)));
     }
 
+    //to assert data fits BD requirements (constraints validated on controller)
     private void doAssertsBdSchema(FlorDto dto){
         Assert.notNull(dto,"The given flor dto must not be null!");
         //BBDD schema for string columns has been defined with not null
@@ -61,40 +63,30 @@ public class FlorService {
         Assert.notNull(dto.getPaisFlor(),"The given flor's country must not be null");
         Assert.isTrue(dto.getNomFlor().length()<=255,"The given flor's name length must not be > 255 characters");
         Assert.isTrue(dto.getPaisFlor().length()<=255,"The given flor's country length must not be > 255 characters");
-        assertNoDataDuplication(dto);
     }
 
-    /**
-     * Asserts in BBD there's no other resource (with different id) with IDENTICAL name and country.
-     * If fails DuplicateDataException is thrown.
-     * Note: if exists but has the same ID, means that the flor provided is equals to the flor saved, so
-     * save/override is idempotent.
-     * @param dto FlorDto with the values to validate. If ID field is not null, exist the possibility to idempotent save.
-     * @Trows DuplicateDataException
-     */
+
     private void assertNoDataDuplication(FlorDto dto){
         Assert.notNull(dto,"The given flor dto must not be null!");
 
         repository.findByNomFlorAndPaisFlor(dto.getNomFlor(), dto.getPaisFlor())
                 .ifPresent(entity -> {
+                    //no exception if dto's id = entity found id (just replace without changes)
                     if(!(entity.getPk_FlorID().equals(dto.getPk_FlorID()))){
-                        throw new DuplicateDataException
-                                ("Ja hi ha registrada una altra flor amb el mateix nom i en el mateix país. "+
-                                        entity);
+                        throw new DuplicateDataException(entity.getPk_FlorID());
                     }
                 });
     }
 
-    public FlorDto replace(FlorDto dto){
+    @Override
+    public FlorDto replaceOne(FlorDto dto){
         doAssertsBdSchema(dto);
-
+        assertNoDataDuplication(dto);
         return parser.toDto(
                 repository.findById(dto.getPk_FlorID())
                     .map(oldEntity -> repository.save( //if present -> replace
                             parser.updateEntity(oldEntity,dto)))
                     .orElseThrow(() -> //if not present -> not found exception
-                            new FlorNotFoundException
-                                ("Actualitzar dades de la flor cancel·lat. No existeix cap flor amb id: "
-                                        +dto.getPk_FlorID())));
+                            new FlorNotFoundException(dto.getPk_FlorID())));
     }
 }

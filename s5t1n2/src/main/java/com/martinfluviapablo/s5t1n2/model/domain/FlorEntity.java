@@ -1,13 +1,12 @@
-/*
-Restriccions i validacions de la data en el DTO, aquí només configuració de la BBDD
- */
-
 package com.martinfluviapablo.s5t1n2.model.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Getter
@@ -19,7 +18,7 @@ public class FlorEntity {
     @Id
     @Column(name="flor_id")
     @GeneratedValue
-    private Integer pk_FlorID; //SonarLint alert due field name format!
+    private Integer pk_FlorID;
 
     @Column(name = "nom", nullable = false) //default length 255, can be blank ""
     private String nomFlor;

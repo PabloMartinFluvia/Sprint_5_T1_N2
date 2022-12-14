@@ -1,0 +1,94 @@
+INFO:
+Comentaris en les classes usats com apunts / info d'ús personal.
+0) url de la documentació modificada (no default)
+    http://localhost:9001/swagger-ui
+    http://localhost:9001/api-docs
+1) Path general dels recursos canviat a plural: /flors enlloc de /flor -> veure FlorController
+2) Per a saber si el string associat al nom d'un país pertany a la UE
+	no es té en compte les majúscules ni accents. Ex: iTaLiA = Itàlia -> veure InfoUE en domain.
+3) No està permés tenir en la BBDD 2 registres amb idèntic nom i país -> conflict exception
+4) Validacions del dto en POST i PUT:
+	tipusPais -> null (sempre)
+	nom i pais -> not blank	i número màxim de caràcters (sempre) -> compounded constraint @ValidString
+	id -> null (POST) -> validació grup AddGroup
+	   -> not null i positiu (PUT) -> compounded constraint @ValidId i validació grup ReplaceGroup
+	            Obs: anotació @ValidId aplicada també en els paths variables (GETONE i DELETE)
+		NOTA: els les 2 interfaces d'agrupació hereden del Default group
+			-> Realitzar una validació d'aquell grup implica validar les restriccions:
+					específiques d'aquell grup + les que no estan associades a cap grup
+	-> veure paquet dto
+5) Generació de links hateoas: dues classes, per a separar comportaments i reduïr número de imports
+    controllers/FlorModelAssembler: passar el Dto to EntityModel amb links, apoiant-se en FlorLinks.class
+    controllers/FlorLinks: proporcionar els links i els tipus de relacions al FlorModelAssembler
+6)  Esquemes i exemples de la documentació:
+    En cas de massa complex / voler reutilitzar des de components / per comoditat els he creat
+    com objectes enlloc d'anotacions
+     -> veure documentation/ExamplesConfig.class , documentation/SchemasConfig.class
+7) Documentar endpoints mitjançant anotacions:
+    He creat anotacions compostes, per a no duplicar info + no "embrutar" més el codi.
+    -> veure paquet controllers/operationAnnotations
+
+DUBTES:
+0) ANOTACIONS PER A DOCUMENTAR
+    He vist que en molts llocs / info es posen les anotacions en la mateixa classe (ex: en el controlador).
+    Tot i que entenc la "comoditat" d'usar les anotacions en lloc de crear els objectes/beans, fer-ho així
+    no es considera un smell code?
+    Ho dic perquè pot requerir moltes més lines de codi que la mateixa lògica que es vol documentar,
+    dificulta la llegibilitat, es podria convertir en un spaghetti code amb molts nivells d'anidació...
+1) IMPORTS
+    Tenia entès que, tot i no ser una regla estricta, existeixen mètriques per a les bones pràctiques,
+    i per al nombre d'acoblaments/relacions entre classes (incloent-hi imports) a partir de 9-12-15 es
+    considera excessiu (com menys millor).
+    Però amb el framework de Spring és fa difícil, i amb lús d'anotacions els imports es disparen...
+    Alguna mètrica / estàndard recomanable?
+A) HATEOAS:
+    A.1) Els links a adjuntar en retornar un recurs només són els endpoints que tenen un mètode GET?
+         En tots els exemples que he vist és així, però enlloc he vist una explicació...
+    A.2) Dependència cíclica en generar els links
+            controlador acoplat a qui li proporciona el EntityModel<FlorDto> a retornar ->
+            qui proporciona el EntityModel<FlorDto> necessita usar Links ->
+            per a generar un Link cal acoblar-se al controlador {linkTo(methodOn(CONTROLLER_CLASS)...}
+            -> es genera una dependència cíclica
+            -> Alguna manera de trencar-la?
+            Pel que tinc entès es trenquen interposant interfaces, però igualment el controlador
+            NO funcionaria amb qualsevol implementació, només amb aquella en què en fer
+            linkTo(methodOn(CONTROLLER_CLASS)... conegues el controlador en qüestió, per a poder
+            seleccionar el mètode en concret d'aquell controlador...
+
+            O seria viable generar els links mitjançant reflection (a la classe que els crea
+            se li injecta un atribut tipus Class sense saber quina és en concret (que s'hauria generat
+            el bean "per fora") + mitjançant reflection buscaria/filtraria els Methods específics
+            buscats + generaria el link)
+            ?
+
+B) RESPOSTES EN LA DOCUMENTACIÓ:
+    B.1) Hi han respostes possibles que des de la pàgina de la documentació, en fer "try it out",
+        mai es donaran (per exemple: introduir un id <0 (que està documentat com integer minimum 1)).
+        Igualment, s'ha de documentar la resposta, no?
+        La possible resposta quan no existeix l'endpoint (path en url incorrecte) s'ha de documentar?
+        * Hi ha una possible resposta que no he documentat, punt següent
+    B.2) Missatges en les excepcions / errors
+        En el @ControllerAdvice he acavat fent mètodes específics, ja que no m'agradaven alguns
+        missatges generats per defecte, ja que entenc que, en cas de ser una API pública, podria
+        donar informació interna i suposaria una vulnerabilitat.
+        Però no he aconseguit personalitzar/modificar el missatge per a HttpMessageNotReadableException
+        (per exemple en el cas d'un POST/PUT amb empty body).
+        El missatge sembla que sigui una concatenació TIPUS : DETALLS, però no he aconseguit trovar
+        on s'ajunten ni qui/com es proporcionen els dos valors.
+        Hi ha alguna manera d'accedir només al TIPUS / customitzar el missatge?
+        S'hauria de proporcionar un exemple per a aquest tipus de resposta?
+    B.3) Definir l'esquema per a una resposta d'un DTO amb links (2XXX GET POST PUT)
+        Les classes que ho representen fidelment "existeixen", així que definir un objecte Schema +
+        guardar-ho en components + referenciar-lo en l'anotació de la resposta seria "ineficient".
+        Indicar-ho mitjançant l'anotació  @Content(schema = @Schema(implementation = xxx.class))
+        NO és possible, ja que són genèriques i versió 3 no ho permet.
+        EntityModel<FlorDto> , CollectionModel<EntityModel<FlorDto>>
+        https://github.com/swagger-api/swagger-core/issues/3496
+        Quina seria la manera correcta d'indicar implementation = xxx.class ?
+        He intentat de varies maneres posar l'anotació @Schema a aquests tipus, però no aconsegueixo
+        que es guardi en components (per a poder usar-lo mitjançant una referència).
+        L'únic que m'ha funcionat és crear 2 classes extends la genèrica i anotar-la com esquema /
+        utilitzar-la com a classe que implementa l'esquema.
+        Però és un smell code com una casa (classe "buida que no fa res")...
+        Per no embrutar més les he declarat com internes dins de FlorModelAssembler....
+

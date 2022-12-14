@@ -27,8 +27,6 @@ public class InfoUE {
     }
 
     public boolean isMember(String pais){
-        return  paisos.stream().anyMatch(s ->collator.equals(s,pais));
+        return  paisos.stream().anyMatch(paisUE ->collator.equals(paisUE,pais));
     }
-
-    //add and remove països in Set not implemented
 }

@@ -63,13 +63,6 @@ public class FlorParser {
         return entity;
     }
 
-    /**
-     * Set to FlorEntity's fields the values provided by FlorDto.
-     * IMPORTANT: FlorEntity's ID it's NOT replaced.
-     * @param entity FlorEntity to update
-     * @param dto FlorDto with the new values
-     * @return the entity with values updated (without replacing the id)
-     */
     public FlorEntity updateEntity(FlorEntity entity, FlorDto dto){
         Assert.notNull(entity,"The given flor entity entity must not be null!");
         Assert.notNull(dto,"The given flor dto entity must not be null!");

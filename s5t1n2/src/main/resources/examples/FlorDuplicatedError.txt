@@ -1,0 +1,7 @@
+{
+    "type": "DuplicateDataException",
+    "message": [
+        "Ja existeix una altra flor (id: 24) amb idèntic nom i país."
+    ],
+    "code": 409
+}

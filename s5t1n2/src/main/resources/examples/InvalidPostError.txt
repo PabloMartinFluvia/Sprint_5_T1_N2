@@ -1,0 +1,9 @@
+{
+    "type": "MethodArgumentNotValidException",
+    "message": [
+        "pk_FlorID: No es pot proporcionar el valor del id.",
+        "paisFlor: Aquest camp no pot estar en blanc, ni null, ni superar el màxim permès (255 caràcters).",
+        "tipusFlor: No s'ha de proporcionar si el país de la flor és membre de la UE o no."
+    ],
+    "code": 400
+}

@@ -1,0 +1,14 @@
+{
+  "pk_FlorID": 2,
+  "nomFlor": "RosaV2",
+  "paisFlor": "AlemanyaV2",
+  "tipusFlor": "Fora UE",
+  "_links": {
+    "self": {
+      "href": "http://localhost:9001/flors/getOne/2"
+    },
+    "collection": {
+      "href": "http://localhost:9001/flors/getAll"
+    }
+  }
+}

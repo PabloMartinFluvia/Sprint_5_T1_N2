@@ -1,5 +1,0 @@
-{
-    "type": "ConstraintViolationException",
-    "message": "getOne.id: S'ha de proporcionar un id enter i >0.",
-    "code": 400
-}

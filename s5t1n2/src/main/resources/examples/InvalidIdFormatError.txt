@@ -1,0 +1,7 @@
+{
+    "type": "MethodArgumentTypeMismatchException",
+    "message": [
+        "id ha de ser del tipus java.lang.Integer"
+    ],
+    "code": 400
+}
